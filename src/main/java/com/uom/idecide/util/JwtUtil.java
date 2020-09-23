@@ -15,10 +15,10 @@ import java.util.Date;
 public class JwtUtil {
 
     /**
-     * 这个key就是我们加的盐，因为盐可能过一段时间要变,
-     * 因此最好写在配置文件中
-     * 注意:谁调用JwtUtil，谁往key和ttl中赋值，增强软件的可扩展性！
-     * 不然所有调用方用的都是相同key和ttl！
+     * This key is used for generating a JWT
+     * and the value of the key will be automatically assigned by
+     * the configuration in application.properties.
+     * ttl is the time-to-live of the JWT. 1 hour according to the settings.
      */
     private String key ;
 
@@ -41,11 +41,11 @@ public class JwtUtil {
     }
 
     /**
-     * 生成JWT
+     * generate JWT
      *
-     * @param id    用户的id
-     * @param subject   用户的名称
-     * @return  用户的角色
+     * @param id    user id
+     * @param subject   user name
+     * @return  user's role, such as user, admin, researcher
      */
     public String createJWT(String id, String subject, String roles) {
         long nowMillis = System.currentTimeMillis();
@@ -53,7 +53,8 @@ public class JwtUtil {
         JwtBuilder builder = Jwts.builder().setId(id)
                 .setSubject(subject)
                 .setIssuedAt(now)
-                .signWith(SignatureAlgorithm.HS256, key).claim("roles", roles);
+                .signWith(SignatureAlgorithm.HS256, key)
+                .claim("roles", roles);
         if (ttl > 0) {
             builder.setExpiration( new Date( nowMillis + ttl));
         }
@@ -61,7 +62,7 @@ public class JwtUtil {
     }
 
     /**
-     * 解析JWT
+     * parseJWT
      * @param jwtStr
      * @return
      */

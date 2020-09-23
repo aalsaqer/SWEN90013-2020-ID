@@ -127,8 +127,7 @@ public class SurveyController {
     }
 
 
-    @RequestMapping(method = RequestMethod.PUT,
-            produces = "application/json;charset=UTF-8")
+    @RequestMapping(method = RequestMethod.PUT, produces = "application/json;charset=UTF-8")
     public Result updateById(@RequestBody JSONObject jsonParam) {
         try{
             PrivilegeUtil.checkAdmin(request);

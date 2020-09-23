@@ -41,7 +41,12 @@ public class AdminController {
 	 */
 	@RequestMapping(method= RequestMethod.POST)
 	public Result add(@RequestBody Admin admin){
-		adminService.add(admin);
+		try{
+			adminService.add(admin);
+		}catch(Exception e){
+			return new Result(false, StatusCode.REPERROR,e.getMessage());
+		}
+
 		return new Result(true, StatusCode.OK,"Inserting successfully");
 	}
 

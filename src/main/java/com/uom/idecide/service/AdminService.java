@@ -37,7 +37,11 @@ public class AdminService {
 	 * 增加
 	 * @param admin
 	 */
-	public void add(Admin admin) {
+	public void add(Admin admin) throws Exception {
+		Admin adminInDb = adminDao.findByEmail(admin.getEmail());
+		if(adminInDb!=null && adminInDb.getAdminId()!=null){
+			throw new Exception("This email address has been used");
+		}
 		admin.setAdminId( idWorker.nextId()+"" );
 		//密码加密
 		admin.setPassword(encoder.encode(admin.getPassword()));

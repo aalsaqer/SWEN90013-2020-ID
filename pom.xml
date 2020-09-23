@@ -48,19 +48,19 @@
 
 
 
-		<!--mongodb依赖-->
+		<!--mongodb-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
 
-		<!--Springboot 的Security包-->
+		<!--Springboot Security-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
-
+		<!--JSON Parser-->
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>

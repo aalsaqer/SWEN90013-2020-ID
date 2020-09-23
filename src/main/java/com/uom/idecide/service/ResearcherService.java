@@ -38,7 +38,12 @@ public class ResearcherService {
 	 * 增加
 	 * @param researcher
 	 */
-	public void add(Researcher researcher) {
+	public void add(Researcher researcher) throws Exception {
+		Researcher researcherInDb = researcherDao.findByEmail(researcher.getEmail());
+		if(researcherInDb!=null && researcherInDb.getResearcherId()!=null){
+			throw new Exception("This email address has been used");
+		}
+
 		researcher.setResearcherId( idWorker.nextId()+"" );
 		//密码加密
 		researcher.setPassword(encoder.encode(researcher.getPassword()));

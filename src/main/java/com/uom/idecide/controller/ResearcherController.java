@@ -37,7 +37,11 @@ public class ResearcherController {
 	 */
 	@RequestMapping(method= RequestMethod.POST)
 	public Result add(@RequestBody Researcher researcher){
-		researcherService.add(researcher);
+		try {
+			researcherService.add(researcher);
+		} catch (Exception e) {
+			return new Result(false, StatusCode.REPERROR,e.getMessage());
+		}
 		return new Result(true, StatusCode.OK,"增加成功");
 	}
 

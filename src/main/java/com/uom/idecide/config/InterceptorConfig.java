@@ -7,23 +7,24 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 /**
- * Springboot默认实现了SpringMVC的常用配置
- * 但是例如 文件解析器 拦截器 Springboot并没有提供
- * 因此需要自己写对应的配置类
+ * This is a configuration class which likes a registry.
+ * We can register our custom interceptors here and
+ * so that springboot will pass all the request through
+ * the registered interceptors first.
  */
 @Configuration
 public class InterceptorConfig extends WebMvcConfigurationSupport {
-    //把需要注册的拦截器注入进来
-    @Autowired
+
+    @Autowired  //inject our custom interceptor here
     JwtInterceptor jwtInterceptor;
 
-    //重写WebMvcConfigurationSupport中的添加拦截器的方法
+    //overwrite addInterceptors() in WebMvcConfigurationSupport to
     protected void addInterceptors(InterceptorRegistry registry){
-        //注册拦截器要声明拦截器对象和要拦截的请求
+        //register the interceptor
         registry.addInterceptor(jwtInterceptor)
-                //拦截所有路径
+                //intercept all kinds of path
                 .addPathPatterns("/**")
-                //出了登录的路径不拦截
+                //except login path
                 .excludePathPatterns("/**/login/**");
     }
 
