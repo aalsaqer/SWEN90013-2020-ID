@@ -41,9 +41,11 @@ public class UserService {
 		if(userInDb!=null && userInDb.getUserId()!=null){
 			throw new Exception("This email address has been used");
 		}
-
-		user.setUserId(idWorker.nextId()+"");
-		//密码加密
+		if(user.getUserId()==null || "".equals(user.getUserId())){
+			//if user already have user id, dont need to assign a new one
+			user.setUserId(idWorker.nextId()+"");
+		}
+		//Encoding password
 		user.setPassword(encoder.encode(user.getPassword()));
 		userDao.save(user);
 	}
@@ -51,7 +53,7 @@ public class UserService {
 
 	public User login(String email, String password) throws Exception {
 		User userLogin = userDao.findByEmail(email);
-		//查看数据库中的密码和用户输入的密码匹配是否相同
+		//check whether the password submitted is equal to the password from database
 		if(userLogin!=null && encoder.matches(password,userLogin.getPassword())){	//prevent from null pointer
 			//login successful
 			return userLogin;

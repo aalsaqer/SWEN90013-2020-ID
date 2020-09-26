@@ -30,9 +30,10 @@ public class JwtInterceptor implements HandlerInterceptor {
         String header = request.getHeader("Authorization");
         System.out.println("interceptor has been executed!");
         if(header!=null && !"".equals(header)){
-            //If a request contains Token, then parse it, the value of token should start with "uom "
+            /*//If a request contains Token, then parse it, the value of token should start with "uom "
             if(header.startsWith("uom ")){
-                String token = header.substring(4);
+                String token = header.substring(4);*/
+                String token = header;
                 //Validating token
                 try{
                     Claims claims = jwtUtil.parseJWT(token);
@@ -57,7 +58,7 @@ public class JwtInterceptor implements HandlerInterceptor {
                     //if there is any problem of parsing token, throwing an exception
                     throw new RuntimeException("Wrong Token！");
                 }
-            }
+            //}
         }
         //pass the request
         return true;

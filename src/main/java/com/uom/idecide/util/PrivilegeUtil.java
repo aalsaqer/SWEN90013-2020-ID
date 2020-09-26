@@ -30,6 +30,10 @@ public class PrivilegeUtil {
         }
     }
 
+    public static String getUserId(HttpServletRequest request){
+        return (String) request.getAttribute("id");
+    }
+
     public static String checkUser(HttpServletRequest request){
         if(PRIVILEGE.equals("on")){
             String token = (String)request.getAttribute("claims_user");

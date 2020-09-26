@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * 统一异常处理类
+ * Handle all kinds of unhandled the exceptions
  */
 @ControllerAdvice
 public class BaseExceptionHandler {

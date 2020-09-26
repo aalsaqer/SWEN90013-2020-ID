@@ -6,6 +6,7 @@ import com.uom.idecide.entity.StatusCode;
 import com.uom.idecide.pojo.User;
 import com.uom.idecide.service.UserService;
 
+import com.uom.idecide.util.IdWorker;
 import com.uom.idecide.util.JwtUtil;
 
 import com.uom.idecide.util.PrivilegeUtil;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 控制器层
+ * Controller layer
  * @author Administrator
  *
  */
@@ -37,17 +38,34 @@ public class UserController {
 	@Autowired
 	private JwtUtil jwtUtil;
 
+	@Autowired
+	private IdWorker idWorker;
+
+	private String ANONYMOUS_EMAIL = "temp@email.com";
+
 	/**
-	 * add new user
+	 * user sign up
 	 */
 	@RequestMapping(method= RequestMethod.POST)
 	public Result add(@RequestBody User user){
+		String userId = PrivilegeUtil.getUserId(request);
+		if(userId!=null){
+			//It means that this user completed survey and want sign up
+			user.setUserId(userId);	//set user id from JWT
+		}
 		try{
 			userService.add(user);
 		}catch(Exception e){
 			return new Result(false, StatusCode.REPERROR,e.getMessage());
 		}
-		return new Result(true, StatusCode.OK,"Inserted Successfully");
+
+		String token = jwtUtil.createJWT(user.getUserId(),user.getEmail(),"user");
+		System.out.println("sign up token --->: " + token);
+
+		Map<String,Object> map = new HashMap<>();
+		map.put("token",token);		//return the JWT to frontend
+		map.put("roles","user");	//tell the frontend the role is user
+		return new Result(true, StatusCode.OK,"sign up successfully",map);
 	}
 
 	/**
@@ -70,8 +88,7 @@ public class UserController {
 	 * Require: current user permission
 	 */
 	@RequestMapping(value="/{userId}",method= RequestMethod.PUT)
-	public Result updateById(@RequestBody User user,
-							 @PathVariable(value="userId") String id){
+	public Result updateById(@RequestBody User user, @PathVariable(value="userId") String id){
 		try{
 			PrivilegeUtil.checkIsThisUser(request,user.getUserId());
 		}catch(Exception e){
@@ -95,6 +112,21 @@ public class UserController {
 		return new Result(true, StatusCode.OK,"deleted successfully");
 	}
 
+	@RequestMapping(value = "/anonymousLogin")
+	public Result anonymousLogin(){
+		String userId = idWorker.nextId()+"";
+
+		String tempEmail = ANONYMOUS_EMAIL;		//provide a fake email in case of Null Pointer Exception when fetching email
+		String token = jwtUtil.createJWT(userId,tempEmail,"user");
+		System.out.println("anonymous login token --->: " + token);
+		System.out.println("anonymous user id --->: " + userId);
+
+		Map<String,Object> map = new HashMap<>();
+		map.put("token",token);		//return the JWT to frontend
+		map.put("roles","user");	//tell the frontend the role is user
+		return new Result(true, StatusCode.OK,"anonymous login successfully",map);
+	}
+
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public Result login(@RequestBody User user){
 		try {
@@ -104,11 +136,10 @@ public class UserController {
 		}
 
 		String token = jwtUtil.createJWT(user.getUserId(),user.getEmail(),"user");
-		//把token打印出来看看
-		System.out.println(token);
+		System.out.println("login token --->: " + token);
 		Map<String,Object> map = new HashMap<>();
-		map.put("token",token);		//把token返回给前端
-		map.put("roles","user");	//告诉前端role是user
+		map.put("token",token);		//return the JWT to frontend
+		map.put("roles","user");	//tell the frontend the role is user
 		return new Result(true, StatusCode.OK,"login successfully",map);
 	}
 
