@@ -4,7 +4,22 @@ import javax.servlet.http.HttpServletRequest;
 
 public class PrivilegeUtil {
 
-    public static String PRIVILEGE = "off";
+    public static String PRIVILEGE = "on";
+
+    public static String checkResearcherOrAdmin(HttpServletRequest request){
+        if(PRIVILEGE.equals("on")){
+            String adminToken = (String)request.getAttribute("claims_admin");
+            String researcherToken = (String)request.getAttribute("claims_researcher");
+
+            if((adminToken==null || "".equals(adminToken))
+                    && (researcherToken==null || "".equals(researcherToken))){
+                throw new RuntimeException("Require admin user or researcher user privilege");
+            }
+            return (String) request.getAttribute("id");
+        }else{
+            return null;
+        }
+    }
 
     public static String checkAdmin(HttpServletRequest request){
         if(PRIVILEGE.equals("on")){
@@ -38,7 +53,7 @@ public class PrivilegeUtil {
         if(PRIVILEGE.equals("on")){
             String token = (String)request.getAttribute("claims_user");
             if(token == null || "".equals(token)){
-                throw new RuntimeException("Please login first");
+                throw new RuntimeException("Please bring valid JWT");
             }
             return (String) request.getAttribute("id");
         }else{

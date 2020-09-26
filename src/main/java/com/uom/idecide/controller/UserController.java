@@ -1,6 +1,5 @@
 package com.uom.idecide.controller;
 
-import com.uom.idecide.entity.PageResult;
 import com.uom.idecide.entity.Result;
 import com.uom.idecide.entity.StatusCode;
 import com.uom.idecide.pojo.User;
@@ -11,7 +10,6 @@ import com.uom.idecide.util.JwtUtil;
 
 import com.uom.idecide.util.PrivilegeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,8 +19,6 @@ import java.util.Map;
 
 /**
  * Controller layer
- * @author Administrator
- *
  */
 @RestController
 @CrossOrigin
@@ -69,13 +65,13 @@ public class UserController {
 	}
 
 	/**
-	 * Query by ID
+	 * find the details of a user by user ID
 	 * Require: admin user permission
 	 */
 	@RequestMapping(value="/{userId}",method= RequestMethod.GET)
 	public Result findById(@PathVariable(value="userId") String id){
 		try{
-			PrivilegeUtil.checkAdmin(request);//鉴权是否为admin用户
+			PrivilegeUtil.checkAdmin(request);
 		}catch(Exception e){
 			return new Result(false,StatusCode.ACCESSERROR,e.getMessage());
 		}
@@ -84,16 +80,17 @@ public class UserController {
 	}
 
 	/**
-	 * Update by ID
+	 * Update the details of an user
 	 * Require: current user permission
 	 */
-	@RequestMapping(value="/{userId}",method= RequestMethod.PUT)
-	public Result updateById(@RequestBody User user, @PathVariable(value="userId") String id){
+	@RequestMapping(method= RequestMethod.PUT)
+	public Result updateById(@RequestBody User user){
 		try{
 			PrivilegeUtil.checkIsThisUser(request,user.getUserId());
 		}catch(Exception e){
 			return new Result(false,StatusCode.ACCESSERROR,e.getMessage());
 		}
+		userService.updateById(user);
 		return new Result(true, StatusCode.OK,"updated successfully");
 	}
 
@@ -104,7 +101,7 @@ public class UserController {
 	@RequestMapping(value="/{userId}",method= RequestMethod.DELETE)
 	public Result deleteById(@PathVariable(value="userId") String id){
 		try{
-			PrivilegeUtil.checkAdmin(request);	//鉴权是否为admin用户
+			PrivilegeUtil.checkAdmin(request);	//check whether this user is an admin user
 		}catch(Exception e){
 			return new Result(false,StatusCode.ACCESSERROR,e.getMessage());
 		}
@@ -112,6 +109,10 @@ public class UserController {
 		return new Result(true, StatusCode.OK,"deleted successfully");
 	}
 
+	/**
+	 * anonymous user login
+	 * provide the JWT to the frontend in case this user want to sign up later
+	 */
 	@RequestMapping(value = "/anonymousLogin")
 	public Result anonymousLogin(){
 		String userId = idWorker.nextId()+"";
@@ -127,6 +128,10 @@ public class UserController {
 		return new Result(true, StatusCode.OK,"anonymous login successfully",map);
 	}
 
+
+	/**
+	 * user login
+	 */
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public Result login(@RequestBody User user){
 		try {
@@ -143,25 +148,16 @@ public class UserController {
 		return new Result(true, StatusCode.OK,"login successfully",map);
 	}
 
-	/**
-	 * 登出
-	 * user权限
-	 */
-	@RequestMapping(value = "/logout", method = RequestMethod.PUT)
-	public Result logout(@RequestBody User user){
-		//TODO 登出只需要在前端销毁token即可
-		return new Result(true, StatusCode.OK,"logout successfully");
-	}
 
 	/**
-	 * 查询用户列表
-	 * admin权限
+	 * check all the users
+	 * Require: admin user permission
 	 */
 	@RequestMapping(value = "/userList", method = RequestMethod.GET)
 	public Result userList(){
 		List<User> userList;
 		try{
-			PrivilegeUtil.checkAdmin(request);	//鉴权是否为admin用户
+			PrivilegeUtil.checkAdmin(request);	//check whether this user is an admin user
 		}catch(Exception e){
 			return new Result(false,StatusCode.ACCESSERROR,e.getMessage());
 		}
@@ -173,7 +169,7 @@ public class UserController {
 	 * 查询用户列表含分页
 	 * admin权限
 	 */
-	@RequestMapping(value = "/userList/{page}/{size}", method = RequestMethod.GET)
+/*	@RequestMapping(value = "/userList/{page}/{size}", method = RequestMethod.GET)
 	public Result userListWithPagination(@PathVariable(value="page") int page,
 										 @PathVariable(value="size") int size){
 		Page<User> pages;
@@ -198,6 +194,6 @@ public class UserController {
 			System.out.println("No Token");
 		}
 		return new Result(true, StatusCode.OK,"test end");
-	}
+	}*/
 	
 }

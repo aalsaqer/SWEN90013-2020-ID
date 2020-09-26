@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Controller layer
+ */
 @RestController
 @CrossOrigin
 @RequestMapping("/survey")
@@ -32,11 +35,18 @@ public class SurveyController {
     @Autowired
     private HttpServletRequest request;
 
+    /**
+     * fetch all of the surveys without survey details
+     */
     @RequestMapping(value = "/allSurveyId",method= RequestMethod.GET)
     public Result getAllSurveyId(){
-        return new Result(true, StatusCode.OK,"fetching successfully",surveyService.findAllByJsonStrNotNull());
+        return new Result(true, StatusCode.OK,"fetching successful",surveyService.findAllByJsonStrNotNull());
     }
 
+    /**
+     * add new survey
+     * Require: admin user permission
+     */
     @RequestMapping(method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
     public Result add(@RequestBody JSONObject jsonParam) {
         try{
@@ -67,7 +77,7 @@ public class SurveyController {
         }
 
        // return the inserted survey's surveyId to frontend
-        return new Result(true, StatusCode.OK,"Inserting successfully", surveyService.save(survey));
+        return new Result(true, StatusCode.OK,"Insert successful", surveyService.save(survey));
     }
 
     //the url for uploading image
@@ -78,6 +88,10 @@ public class SurveyController {
     @Value("${system.config.imageLoadPath}")
     private String imageLoadPath;
 
+    /**
+     * handling the image uploading function of survey
+     * Require: admin user permission
+     */
     @RequestMapping(value = "/uploadImg", method = RequestMethod.POST)
     public Result uploadImg(@RequestParam("img") MultipartFile file, HttpServletRequest request){
 
@@ -121,12 +135,18 @@ public class SurveyController {
     }
 
 
+    /**
+     * find all the details of a survey according to survey ID
+     */
     @RequestMapping(value="/{surveyId}",method= RequestMethod.GET)
     public Result findById(@PathVariable("surveyId") String id){
-        return new Result(true, StatusCode.OK,"fetching successfully",surveyService.findById(id));
+        return new Result(true, StatusCode.OK,"fetch successful",surveyService.findById(id));
     }
 
-
+    /**
+     * update the details of a survey according to survey ID
+     * Require: admin user permission
+     */
     @RequestMapping(method = RequestMethod.PUT, produces = "application/json;charset=UTF-8")
     public Result updateById(@RequestBody JSONObject jsonParam) {
         try{
@@ -160,9 +180,13 @@ public class SurveyController {
         }
         surveyService.update(survey);
 
-        return new Result(true, StatusCode.OK,"updating successfully");
+        return new Result(true, StatusCode.OK,"update successful");
     }
 
+    /**
+     * delete a survey according to survey ID
+     * Require: admin user permission
+     */
     @RequestMapping(value="/{surveyId}",method = RequestMethod.DELETE)
     public Result deleteById(@PathVariable("surveyId") String id){
         try{
@@ -172,7 +196,7 @@ public class SurveyController {
         }
 
         surveyService.deleteById(id);
-        return new Result(true, StatusCode.OK,"delete the survey successfully");
+        return new Result(true, StatusCode.OK,"delete successful");
     }
 
 }

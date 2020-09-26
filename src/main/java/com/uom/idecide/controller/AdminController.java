@@ -18,9 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 控制器层
- * @author Administrator
- *
+ * Controller layer
  */
 @RestController
 @CrossOrigin
@@ -37,7 +35,7 @@ public class AdminController {
 	private JwtUtil jwtUtil;
 
 	/**
-	 * add an admin account
+	 * admin user sign up
 	 */
 	@RequestMapping(method= RequestMethod.POST)
 	public Result add(@RequestBody Admin admin){
@@ -46,29 +44,32 @@ public class AdminController {
 		}catch(Exception e){
 			return new Result(false, StatusCode.REPERROR,e.getMessage());
 		}
-
-		return new Result(true, StatusCode.OK,"Inserting successfully");
+		String token = jwtUtil.createJWT(admin.getAdminId(),admin.getEmail(),"admin");
+		Map<String,Object> map = new HashMap<>();
+		map.put("token",token);
+		map.put("roles","admin");
+		return new Result(true, StatusCode.OK,"sign up successful",map);
 	}
 
+	/**
+	 * admin user login
+	 */
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public Result login(@RequestBody Admin admin){
 		admin =adminService.login(admin.getEmail(),admin.getPassword());
-		if(admin == null){		//为null的原因之一是密码错误
+		if(admin == null){		//if admin equals to null, its mean that the user dose not exist, or wrong password
 			return new Result(false, StatusCode.LOGINERROR,"login fail");
 		}
 		String token = jwtUtil.createJWT(admin.getAdminId(),admin.getEmail(),"admin");
 		Map<String,Object> map = new HashMap<>();
-		map.put("token",token);		//把token返回给前端
-		map.put("roles","admin");	//告诉前端role是admin
+		map.put("token",token);
+		map.put("roles","admin");
 		return new Result(true, StatusCode.OK,"login successful",map);
 	}
 
-	@RequestMapping(value = "/logout", method = RequestMethod.PUT)
-	public Result logout(@RequestBody Admin admin){
-		//TODO 登出只需要在前端销毁token即可
-		return new Result(true, StatusCode.OK,"logout successful");
-	}
-
+	/**
+	 * query all existing admin user in database
+	 */
 	@RequestMapping(value = "/adminList", method = RequestMethod.GET)
 	public Result adminList(){
 		try{
@@ -79,6 +80,51 @@ public class AdminController {
 		return new Result(true, StatusCode.OK,"operation successful",adminService.findAll());
 	}
 
+	/**
+	 * find the details of a admin user by admin ID
+	 * Require: admin user permission
+	 */
+	@RequestMapping(value="/{adminId}",method= RequestMethod.GET)
+	public Result findById(@PathVariable(value="adminId") String id){
+		try{
+			PrivilegeUtil.checkAdmin(request);
+		}catch (Exception e){
+			return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
+		}
+		return new Result(true, StatusCode.OK,"fetch successful",adminService.findById(id));
+	}
+
+	/**
+	 * update the details of a admin user by admin ID
+	 * Require: admin user permission
+	 */
+	@RequestMapping(method= RequestMethod.PUT)
+	public Result updateById(@RequestBody Admin admin){
+		try{
+			PrivilegeUtil.checkAdmin(request);
+		}catch (Exception e){
+			return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
+		}
+		adminService.updateById(admin);
+		return new Result(true, StatusCode.OK,"update successful");
+	}
+
+	/**
+	 * delete an admin user by admin ID
+	 * Require: admin user permission
+	 */
+	@RequestMapping(value="/{adminId}",method= RequestMethod.DELETE)
+	public Result deleteById(@PathVariable(value="adminId") String id){
+		try{
+			PrivilegeUtil.checkAdmin(request);
+		}catch (Exception e){
+			return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
+		}
+		adminService.deleteById(id);
+		return new Result(true, StatusCode.OK,"delete successful");
+	}
+
+/*
 	@RequestMapping(value = "/adminList/{page}/{size}", method = RequestMethod.GET)
 	public Result adminListWithPagination(@PathVariable(value="page") int page, @PathVariable(value="size") int size){
 		try{
@@ -91,52 +137,6 @@ public class AdminController {
 		return new Result(true, StatusCode.OK,"operation successful", new PageResult<Admin>(page,pages.getTotalElements(),pages.getTotalPages(),pages.getContent()));
 	}
 
-	/**
-	 * 根据ID查询
-	 * @param id ID
-	 * @return
-	 */
-	@RequestMapping(value="/{adminId}",method= RequestMethod.GET)
-	public Result findById(@PathVariable(value="adminId") String id){
-		try{
-			PrivilegeUtil.checkAdmin(request);
-		}catch (Exception e){
-			return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
-		}
-		return new Result(true, StatusCode.OK,"fetching successfully",adminService.findById(id));
-	}
-
-	/**
-	 * 修改
-	 * @param admin
-	 */
-	@RequestMapping(method= RequestMethod.PUT)
-	public Result updateById(@RequestBody Admin admin){
-		try{
-			PrivilegeUtil.checkAdmin(request);
-		}catch (Exception e){
-			return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
-		}
-		adminService.updateById(admin);
-		return new Result(true, StatusCode.OK,"updating successfully");
-	}
-
-	/**
-	 * 删除
-	 * @param id
-	 */
-	@RequestMapping(value="/{adminId}",method= RequestMethod.DELETE)
-	public Result deleteById(@PathVariable(value="adminId") String id){
-		try{
-			PrivilegeUtil.checkAdmin(request);
-		}catch (Exception e){
-			return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
-		}
-		adminService.deleteById(id);
-		return new Result(true, StatusCode.OK,"deleting successfully");
-	}
-
-
 	@RequestMapping(value = "/jwt", method = RequestMethod.POST)
 	public Result testJwt(HttpServletRequest req){
 		String token = (String) req.getAttribute("claims_admin");
@@ -146,6 +146,6 @@ public class AdminController {
 			System.out.println("没有token");
 		}
 		return new Result(true, StatusCode.OK,"test end");
-	}
+	}*/
 	
 }

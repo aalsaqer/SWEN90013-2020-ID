@@ -4,12 +4,6 @@ import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
 
-/**
- * 实体类
- * @author Administrator
- *
- */
-
 public class User implements Serializable{
 
 	@Id

@@ -4,13 +4,6 @@ import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
 
-/**
- * 实体类
- * @author Administrator
- *
- */
-/*@Entity
-@Table(name="tb_researcher")*/
 public class Researcher implements Serializable{
 
 	@Id
