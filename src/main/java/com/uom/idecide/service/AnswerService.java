@@ -4,8 +4,13 @@ package com.uom.idecide.service;
 import com.uom.idecide.dao.AnswerDao;
 import com.uom.idecide.pojo.Answer;
 
+import com.uom.idecide.pojo.Survey;
 import com.uom.idecide.util.CsvUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,9 +20,26 @@ public class AnswerService {
 
     @Autowired
     private AnswerDao AnswerDao;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     public void add(Answer answer) {
         AnswerDao.save(answer);
+    }
+
+    public void update(Answer answer) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(answer.getAnswerId()));
+        Update update = new Update();
+        if(answer.getCompletedTime()!=null)   update.set("completedTime",answer.getCompletedTime());
+        if(answer.getAttemptCompleted()!=null)   update.set("attemptCompleted",answer.getAttemptCompleted());
+        if(answer.getQuestions()!=null)   update.set("questions",answer.getQuestions());
+        //only update the fields are not null
+        mongoTemplate.findAndModify(query,update,Answer.class);
+    }
+
+    public List<Answer> getUnfinishedResultByUserId(String id) {
+        return AnswerDao.findAllByUserIdAndAttemptCompletedIsFalse(id);
     }
 
     public List<Answer> getAllResultByUserId(String id) {

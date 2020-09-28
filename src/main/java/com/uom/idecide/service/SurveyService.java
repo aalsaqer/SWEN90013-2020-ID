@@ -52,9 +52,8 @@ public class SurveyService {
         if(survey.getSurveyIntroduction()!=null)   update.set("surveyIntroduction",survey.getSurveyIntroduction() );
         if(survey.getSurveyImageName()!=null)   update.set("surveyImageName",survey.getSurveyImageName() );
         if(survey.getJsonStr()!=null)   update.set("jsonStr",survey.getJsonStr() );
-        //只更新非null的对象字段，null的对象字段保留
+        //only update the fields are not null
         mongoTemplate.findAndModify(query,update,Survey.class);
-
     }
 /*
     public List<ActionPlan> getAllActionsBySurveyId(String id) {

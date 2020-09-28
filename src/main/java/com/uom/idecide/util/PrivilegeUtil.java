@@ -6,6 +6,23 @@ public class PrivilegeUtil {
 
     public static String PRIVILEGE = "on";
 
+    public static String checkUserOrResearcherOrAdmin(HttpServletRequest request){
+        if(PRIVILEGE.equals("on")){
+            String adminToken = (String)request.getAttribute("claims_admin");
+            String researcherToken = (String)request.getAttribute("claims_researcher");
+            String userToken = (String)request.getAttribute("claims_user");
+
+            if((adminToken==null || "".equals(adminToken))
+                    && (researcherToken==null || "".equals(researcherToken))
+                    && (userToken==null || "".equals(userToken))){
+                throw new RuntimeException("Require user or admin user or researcher user privilege");
+            }
+            return (String) request.getAttribute("id");
+        }else{
+            return null;
+        }
+    }
+
     public static String checkResearcherOrAdmin(HttpServletRequest request){
         if(PRIVILEGE.equals("on")){
             String adminToken = (String)request.getAttribute("claims_admin");

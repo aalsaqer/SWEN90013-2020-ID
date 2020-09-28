@@ -61,6 +61,7 @@ public class UserController {
 		Map<String,Object> map = new HashMap<>();
 		map.put("token",token);		//return the JWT to frontend
 		map.put("roles","user");	//tell the frontend the role is user
+		map.put("id",user.getUserId());
 		return new Result(true, StatusCode.OK,"sign up successfully",map);
 	}
 
@@ -125,6 +126,7 @@ public class UserController {
 		Map<String,Object> map = new HashMap<>();
 		map.put("token",token);		//return the JWT to frontend
 		map.put("roles","user");	//tell the frontend the role is user
+		map.put("id",userId);
 		return new Result(true, StatusCode.OK,"anonymous login successfully",map);
 	}
 
@@ -145,6 +147,7 @@ public class UserController {
 		Map<String,Object> map = new HashMap<>();
 		map.put("token",token);		//return the JWT to frontend
 		map.put("roles","user");	//tell the frontend the role is user
+		map.put("id",user.getUserId());
 		return new Result(true, StatusCode.OK,"login successfully",map);
 	}
 

@@ -48,6 +48,7 @@ public class ResearcherController {
 		Map<String,Object> map = new HashMap<>();
 		map.put("token",token);
 		map.put("roles","researcher");
+		map.put("id",researcher.getResearcherId());
 		return new Result(true, StatusCode.OK,"sign up successful",map);
 	}
 
@@ -66,6 +67,7 @@ public class ResearcherController {
 		Map<String,Object> map = new HashMap<>();
 		map.put("token",token);
 		map.put("roles","researcher");
+		map.put("id",researcher.getResearcherId());
 		return new Result(true, StatusCode.OK,"login successful",map);
 	}
 

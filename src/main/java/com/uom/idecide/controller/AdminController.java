@@ -48,6 +48,7 @@ public class AdminController {
 		Map<String,Object> map = new HashMap<>();
 		map.put("token",token);
 		map.put("roles","admin");
+		map.put("id",admin.getAdminId());
 		return new Result(true, StatusCode.OK,"sign up successful",map);
 	}
 
@@ -64,6 +65,7 @@ public class AdminController {
 		Map<String,Object> map = new HashMap<>();
 		map.put("token",token);
 		map.put("roles","admin");
+		map.put("id",admin.getAdminId());
 		return new Result(true, StatusCode.OK,"login successful",map);
 	}
 

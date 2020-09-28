@@ -6,6 +6,7 @@ import com.uom.idecide.pojo.Answer;
 
 import com.uom.idecide.service.AnswerService;
 
+import com.uom.idecide.util.IdWorker;
 import com.uom.idecide.util.PrivilegeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,30 +25,60 @@ public class AnswerController {
     private AnswerService answerService;
     @Autowired
     private HttpServletRequest request;
+    @Autowired
+    private IdWorker idWorker;
 
     /**
      * add new survey result to database & return the corresponding Action Plan
      * Require: user permission (anonymous user is also a user)
      */
-    @RequestMapping(method= RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public Result add(@RequestBody Answer answer) {
+        String userId;
         try{
-            PrivilegeUtil.checkUser(request);
+            userId = PrivilegeUtil.checkUser(request);
         }catch (Exception e){
             return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
         }
+        String answerId = String.valueOf(idWorker.nextId());
+        answer.setAnswerId(answerId);
+        answer.setUserId(userId);   //find the user id from JWT
         answerService.add(answer);
         return new Result(true, StatusCode.OK, "insert successful","ActionPlan XXXX");
     }
 
+    @RequestMapping(value = "/getUnfinishedSurveyByUserIdInJwt",method = RequestMethod.GET)
+    public Result findUnfinishedSurvey() {
+        String userId;
+        try{
+            userId = PrivilegeUtil.checkUser(request);
+        }catch (Exception e){
+            return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
+        }
+        return new Result(true, StatusCode.OK,"fetch successful",answerService.getUnfinishedResultByUserId(userId));
+    }
+
+    @RequestMapping(method = RequestMethod.PUT)
+    public Result update(@RequestBody Answer answer){
+        String userId;
+        try{
+            userId = PrivilegeUtil.checkUser(request);
+        }catch (Exception e){
+            return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
+        }
+        answer.setUserId(userId);   //find the user id from JWT
+        answerService.update(answer);
+        return new Result(true, StatusCode.OK, "update successful","ActionPlan XXXX");
+    }
+
     /**
      * update the details of a survey according to survey ID
-     * Require: admin permission or researcher user permission
+     * Require: user permission or admin permission or researcher user permission
      */
     @RequestMapping(value = "/getResult/{userId}",method= RequestMethod.GET)
     public Result getAllResultByUserId(@PathVariable("userId") String userId) {
         try{
-            PrivilegeUtil.checkResearcherOrAdmin(request);
+            PrivilegeUtil.checkUserOrResearcherOrAdmin(request);
         }catch (Exception e){
             return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
         }
