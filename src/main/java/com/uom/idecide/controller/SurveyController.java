@@ -12,6 +12,8 @@ import com.uom.idecide.util.PrivilegeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +36,14 @@ public class SurveyController {
     private IdWorker idWorker;
     @Autowired
     private HttpServletRequest request;
+
+    /**
+     * find all the details of a survey according to survey ID
+     */
+    @RequestMapping(value="/{surveyId}",method= RequestMethod.GET)
+    public Result findById(@PathVariable("surveyId") String id){
+        return new Result(true, StatusCode.OK,"fetch successful",surveyService.findById(id));
+    }
 
     /**
      * fetch all of the surveys without survey details
@@ -134,14 +144,6 @@ public class SurveyController {
         return new Result(true, StatusCode.OK,"upload failed",fileName);
     }
 
-
-    /**
-     * find all the details of a survey according to survey ID
-     */
-    @RequestMapping(value="/{surveyId}",method= RequestMethod.GET)
-    public Result findById(@PathVariable("surveyId") String id){
-        return new Result(true, StatusCode.OK,"fetch successful",surveyService.findById(id));
-    }
 
     /**
      * update the details of a survey according to survey ID

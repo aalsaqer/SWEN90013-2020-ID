@@ -14,4 +14,5 @@ public interface SurveyDao extends MongoRepository<Survey,String> {
     @Query(fields="{ 'surveyTitle': 1,'surveyId':1 , 'surveyIntroduction':1, 'surveyVersion':1, 'surveyImageName':1 }")
     public List<Survey> findAllByJsonStrNotNull();
 
+
 }

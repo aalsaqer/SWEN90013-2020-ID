@@ -38,7 +38,7 @@ public class AdminService {
 	 * @param admin
 	 */
 	public void add(Admin admin) throws Exception {
-		Admin adminInDb = adminDao.findByEmail(admin.getEmail());
+		Admin adminInDb = adminDao.findByUsername(admin.getUsername());
 		if(adminInDb!=null && adminInDb.getAdminId()!=null){
 			throw new Exception("This email address has been used");
 		}
@@ -49,8 +49,8 @@ public class AdminService {
 	}
 
 
-	public Admin login(String email, String password) {
-		Admin adminLogin = adminDao.findByEmail(email);
+	public Admin login(String username, String password) {
+		Admin adminLogin = adminDao.findByUsername(username);
 		//2.然后那数据库中的密码和用户输入的密码匹配是否相同
 		if(adminLogin!=null && encoder.matches(password,adminLogin.getPassword())){	//prevent from null pointer
 			//login successful

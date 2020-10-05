@@ -37,7 +37,7 @@ public class UserService {
 	 * @param user
 	 */
 	public void add(User user) throws Exception {
-		User userInDb = userDao.findByEmail(user.getEmail());
+		User userInDb = userDao.findByUsername(user.getUsername());
 		if(userInDb!=null && userInDb.getUserId()!=null){
 			throw new Exception("This email address has been used");
 		}
@@ -51,8 +51,8 @@ public class UserService {
 	}
 
 
-	public User login(String email, String password) throws Exception {
-		User userLogin = userDao.findByEmail(email);
+	public User login(String username, String password) throws Exception {
+		User userLogin = userDao.findByUsername(username);
 		//check whether the password submitted is equal to the password from database
 		if(userLogin!=null && encoder.matches(password,userLogin.getPassword())){	//prevent from null pointer
 			//login successful

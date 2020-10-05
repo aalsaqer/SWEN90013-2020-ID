@@ -39,7 +39,7 @@ public class ResearcherService {
 	 * @param researcher
 	 */
 	public void add(Researcher researcher) throws Exception {
-		Researcher researcherInDb = researcherDao.findByEmail(researcher.getEmail());
+		Researcher researcherInDb = researcherDao.findByUsername(researcher.getUsername());
 		if(researcherInDb!=null && researcherInDb.getResearcherId()!=null){
 			throw new Exception("This email address has been used");
 		}
@@ -51,8 +51,8 @@ public class ResearcherService {
 	}
 
 
-	public Researcher login(String email, String password) {
-		Researcher researcherLogin = researcherDao.findByEmail(email);
+	public Researcher login(String username, String password) {
+		Researcher researcherLogin = researcherDao.findByUsername(username);
 		//2.然后那数据库中的密码和用户输入的密码匹配是否相同
 		if(researcherLogin!=null && encoder.matches(password,researcherLogin.getPassword())){	//prevent from null pointer
 			//login successful

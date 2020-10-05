@@ -19,4 +19,6 @@ public interface ResearcherDao extends MongoRepository<Researcher,String> {
 
     public Researcher findByEmail(String email);
 
+    public Researcher findByUsername(String username);
+
 }

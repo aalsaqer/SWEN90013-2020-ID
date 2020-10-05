@@ -44,7 +44,7 @@ public class ResearcherController {
 		} catch (Exception e) {
 			return new Result(false, StatusCode.REPERROR,e.getMessage());
 		}
-		String token = jwtUtil.createJWT(researcher.getResearcherId(),researcher.getEmail(),"researcher");
+		String token = jwtUtil.createJWT(researcher.getResearcherId(),researcher.getUsername(),"researcher");
 		Map<String,Object> map = new HashMap<>();
 		map.put("token",token);
 		map.put("roles","researcher");
@@ -57,12 +57,12 @@ public class ResearcherController {
 	 */
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public Result login(@RequestBody Researcher researcher){
-		researcher =researcherService.login(researcher.getEmail(),researcher.getPassword());
+		researcher =researcherService.login(researcher.getUsername(),researcher.getPassword());
 		if(researcher == null){		//if research equals to null, its mean that the user dose not exist, or wrong password
 			return new Result(false, StatusCode.LOGINERROR,"login fail");
 		}
 
-		String token = jwtUtil.createJWT(researcher.getResearcherId(),researcher.getEmail(),"researcher");
+		String token = jwtUtil.createJWT(researcher.getResearcherId(),researcher.getUsername(),"researcher");
 		System.out.println(token);
 		Map<String,Object> map = new HashMap<>();
 		map.put("token",token);

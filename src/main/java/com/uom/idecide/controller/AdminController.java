@@ -44,7 +44,7 @@ public class AdminController {
 		}catch(Exception e){
 			return new Result(false, StatusCode.REPERROR,e.getMessage());
 		}
-		String token = jwtUtil.createJWT(admin.getAdminId(),admin.getEmail(),"admin");
+		String token = jwtUtil.createJWT(admin.getAdminId(),admin.getUsername(),"admin");
 		Map<String,Object> map = new HashMap<>();
 		map.put("token",token);
 		map.put("roles","admin");
@@ -57,11 +57,11 @@ public class AdminController {
 	 */
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public Result login(@RequestBody Admin admin){
-		admin =adminService.login(admin.getEmail(),admin.getPassword());
+		admin =adminService.login(admin.getUsername(),admin.getPassword());
 		if(admin == null){		//if admin equals to null, its mean that the user dose not exist, or wrong password
 			return new Result(false, StatusCode.LOGINERROR,"login fail");
 		}
-		String token = jwtUtil.createJWT(admin.getAdminId(),admin.getEmail(),"admin");
+		String token = jwtUtil.createJWT(admin.getAdminId(),admin.getUsername(),"admin");
 		Map<String,Object> map = new HashMap<>();
 		map.put("token",token);
 		map.put("roles","admin");

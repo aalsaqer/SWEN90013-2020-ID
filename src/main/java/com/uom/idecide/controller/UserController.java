@@ -37,7 +37,7 @@ public class UserController {
 	@Autowired
 	private IdWorker idWorker;
 
-	private String ANONYMOUS_EMAIL = "temp@email.com";
+	private String ANONYMOUS_NAME = "tempUser";
 
 	/**
 	 * user sign up
@@ -55,7 +55,7 @@ public class UserController {
 			return new Result(false, StatusCode.REPERROR,e.getMessage());
 		}
 
-		String token = jwtUtil.createJWT(user.getUserId(),user.getEmail(),"user");
+		String token = jwtUtil.createJWT(user.getUserId(),user.getUsername(),"user");
 		System.out.println("sign up token --->: " + token);
 
 		Map<String,Object> map = new HashMap<>();
@@ -63,6 +63,26 @@ public class UserController {
 		map.put("roles","user");	//tell the frontend the role is user
 		map.put("id",user.getUserId());
 		return new Result(true, StatusCode.OK,"sign up successfully",map);
+	}
+
+	/**
+	 * user login
+	 */
+	@RequestMapping(value = "/login", method = RequestMethod.POST)
+	public Result login(@RequestBody User user){
+		try {
+			user =userService.login(user.getUsername(),user.getPassword());
+		} catch (Exception e) {
+			return new Result(false, StatusCode.LOGINERROR,e.getMessage());
+		}
+
+		String token = jwtUtil.createJWT(user.getUserId(),user.getUsername(),"user");
+		System.out.println("login token --->: " + token);
+		Map<String,Object> map = new HashMap<>();
+		map.put("token",token);		//return the JWT to frontend
+		map.put("roles","user");	//tell the frontend the role is user
+		map.put("id",user.getUserId());
+		return new Result(true, StatusCode.OK,"login successfully",map);
 	}
 
 	/**
@@ -118,8 +138,8 @@ public class UserController {
 	public Result anonymousLogin(){
 		String userId = idWorker.nextId()+"";
 
-		String tempEmail = ANONYMOUS_EMAIL;		//provide a fake email in case of Null Pointer Exception when fetching email
-		String token = jwtUtil.createJWT(userId,tempEmail,"user");
+		String tempUsername = ANONYMOUS_NAME;		//provide a fake email in case of Null Pointer Exception when fetching email
+		String token = jwtUtil.createJWT(userId,tempUsername,"user");
 		System.out.println("anonymous login token --->: " + token);
 		System.out.println("anonymous user id --->: " + userId);
 
@@ -128,27 +148,6 @@ public class UserController {
 		map.put("roles","user");	//tell the frontend the role is user
 		map.put("id",userId);
 		return new Result(true, StatusCode.OK,"anonymous login successfully",map);
-	}
-
-
-	/**
-	 * user login
-	 */
-	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public Result login(@RequestBody User user){
-		try {
-			user =userService.login(user.getEmail(),user.getPassword());
-		} catch (Exception e) {
-			return new Result(false, StatusCode.LOGINERROR,e.getMessage());
-		}
-
-		String token = jwtUtil.createJWT(user.getUserId(),user.getEmail(),"user");
-		System.out.println("login token --->: " + token);
-		Map<String,Object> map = new HashMap<>();
-		map.put("token",token);		//return the JWT to frontend
-		map.put("roles","user");	//tell the frontend the role is user
-		map.put("id",user.getUserId());
-		return new Result(true, StatusCode.OK,"login successfully",map);
 	}
 
 

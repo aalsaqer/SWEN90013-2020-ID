@@ -17,5 +17,5 @@ public interface AdminDao extends JpaRepository<Admin,String>,JpaSpecificationEx
 public interface AdminDao extends MongoRepository<Admin,String> {
 
     public Admin findByEmail(String email);
-
+    public Admin findByUsername(String username);
 }
