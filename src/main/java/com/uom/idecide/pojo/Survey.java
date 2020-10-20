@@ -10,7 +10,9 @@ public class Survey implements Serializable {
     private String surveyTitle;
     private String surveyVersion;
     private String surveyIntroduction;
+    private Integer surveyDisplayOrder;
     private String surveyImageName;
+    private String surveyIntroductionHtmlB64;
 
     //all of the JSON string in request will be stored in jsonStr
     private String jsonStr;
@@ -19,21 +21,25 @@ public class Survey implements Serializable {
     public Survey() {
     }
 
-    public Survey(String surveyId, String surveyTitle, String surveyVersion, String surveyIntroduction, String surveyImageName, String jsonStr) {
+    public Survey(String surveyId, String surveyTitle, String surveyVersion, String surveyIntroduction, Integer surveyDisplayOrder, String surveyImageName, String surveyIntroductionHtmlB64) {
         this.surveyId = surveyId;
         this.surveyTitle = surveyTitle;
         this.surveyVersion = surveyVersion;
         this.surveyIntroduction = surveyIntroduction;
+        this.surveyDisplayOrder = surveyDisplayOrder;
         this.surveyImageName = surveyImageName;
-        this.jsonStr = jsonStr;
+        this.surveyIntroductionHtmlB64 = surveyIntroductionHtmlB64;
     }
 
-    public Survey(String surveyId, String surveyTitle, String surveyVersion, String surveyIntroduction, String surveyImageName) {
+    public Survey(String surveyId, String surveyTitle, String surveyVersion, String surveyIntroduction, Integer surveyDisplayOrder, String surveyImageName, String surveyIntroductionHtmlB64, String jsonStr) {
         this.surveyId = surveyId;
         this.surveyTitle = surveyTitle;
         this.surveyVersion = surveyVersion;
         this.surveyIntroduction = surveyIntroduction;
+        this.surveyDisplayOrder = surveyDisplayOrder;
         this.surveyImageName = surveyImageName;
+        this.surveyIntroductionHtmlB64 = surveyIntroductionHtmlB64;
+        this.jsonStr = jsonStr;
     }
 
     @Override
@@ -43,9 +49,27 @@ public class Survey implements Serializable {
                 ", surveyTitle='" + surveyTitle + '\'' +
                 ", surveyVersion='" + surveyVersion + '\'' +
                 ", surveyIntroduction='" + surveyIntroduction + '\'' +
+                ", surveyDisplayOrder=" + surveyDisplayOrder +
                 ", surveyImageName='" + surveyImageName + '\'' +
+                ", surveyIntroductionHtmlB64='" + surveyIntroductionHtmlB64 + '\'' +
                 ", jsonStr='" + jsonStr + '\'' +
                 '}';
+    }
+
+    public Integer getSurveyDisplayOrder() {
+        return surveyDisplayOrder;
+    }
+
+    public void setSurveyDisplayOrder(Integer surveyDisplayOrder) {
+        this.surveyDisplayOrder = surveyDisplayOrder;
+    }
+
+    public String getSurveyIntroductionHtmlB64() {
+        return surveyIntroductionHtmlB64;
+    }
+
+    public void setSurveyIntroductionHtmlB64(String surveyIntroductionHtmlB64) {
+        this.surveyIntroductionHtmlB64 = surveyIntroductionHtmlB64;
     }
 
     public String getSurveyImageName() {

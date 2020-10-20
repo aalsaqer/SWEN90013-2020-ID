@@ -12,14 +12,13 @@ import com.uom.idecide.util.PrivilegeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Controller layer
@@ -65,30 +64,88 @@ public class SurveyController {
             return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
         }
 
-        String surveyId = String.valueOf(idWorker.nextId());
+        //String surveyId = String.valueOf(idWorker.nextId());
+        String surveyId = (String) jsonParam.get("surveyId");
+        if(surveyService.existsSurveyBySurveyId(surveyId)){
+            //check whether the id exist
+            return new Result(true, StatusCode.REPERROR,"survey id already exist, please use another id");
+        }
+
         String surveyTitle = (String) jsonParam.get("surveyTitle");
         String surveyVersion = (String) jsonParam.get("surveyVersion");
         String surveyIntroduction = (String) jsonParam.get("surveyIntroduction");
+        Integer surveyDisplayOrder = (Integer) jsonParam.get("surveyDisplayOrder");
         String surveyImageName = (String) jsonParam.get("surveyImageName");
+        String surveyIntroductionHtmlB64 = (String) jsonParam.get("surveyIntroductionHtmlB64");
         Object surveySections = jsonParam.get("surveySections");
 
         //remove these redundant fields
+        if(surveyId!=null) jsonParam.remove("surveyId");
         if(surveyTitle!=null)   jsonParam.remove("surveyTitle");
         if(surveyVersion!=null)   jsonParam.remove("surveyVersion");
         if(surveyIntroduction!=null)   jsonParam.remove("surveyIntroduction");
         if(surveyImageName!=null)   jsonParam.remove("surveyImageName");
+        if(surveyIntroductionHtmlB64!=null) jsonParam.remove("surveyIntroductionHtmlB64");
 
         Survey survey;
         if(surveySections==null){
             //if surveySections not exist, no need to make a json str
-            survey = new Survey(surveyId, surveyTitle,surveyVersion,surveyIntroduction,surveyImageName);
+            survey = new Survey(surveyId, surveyTitle,surveyVersion,surveyIntroduction,surveyDisplayOrder,surveyImageName,surveyIntroductionHtmlB64);
         }else{
-            survey = new Survey(surveyId, surveyTitle,surveyVersion,surveyIntroduction,surveyImageName,jsonParam.toJSONString());
+            survey = new Survey(surveyId, surveyTitle,surveyVersion,surveyIntroduction,surveyDisplayOrder,surveyImageName,surveyIntroductionHtmlB64,jsonParam.toJSONString());
         }
 
        // return the inserted survey's surveyId to frontend
         return new Result(true, StatusCode.OK,"Insert successful", surveyService.save(survey));
     }
+
+    /**
+     * update the details of a survey according to survey ID
+     * Require: admin user permission
+     */
+    @RequestMapping(method = RequestMethod.PUT, produces = "application/json;charset=UTF-8")
+    public Result updateById(@RequestBody JSONObject jsonParam) {
+        try{
+            PrivilegeUtil.checkAdmin(request);
+        }catch (Exception e){
+            return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
+        }
+
+        String surveyId = (String) jsonParam.get("surveyId");
+        String surveyTitle = (String) jsonParam.get("surveyTitle");
+        String surveyVersion = (String) jsonParam.get("surveyVersion");
+        String surveyIntroduction = (String) jsonParam.get("surveyIntroduction");
+        Integer surveyDisplayOrder = (Integer) jsonParam.get("surveyDisplayOrder");
+        String surveyImageName = (String) jsonParam.get("surveyImageName");
+        String surveyIntroductionHtmlB64 = (String) jsonParam.get("surveyIntroductionHtmlB64");
+        Object surveySections = jsonParam.get("surveySections");
+
+        if(surveyId==null) return new Result(true, StatusCode.ERROR,"update fail, please contain the correct survey Id");
+
+        //remove these redundant fields
+        jsonParam.remove("surveyId");
+        if(surveyTitle!=null)   jsonParam.remove("surveyTitle");
+        if(surveyVersion!=null)   jsonParam.remove("surveyVersion");
+        if(surveyIntroduction!=null)   jsonParam.remove("surveyIntroduction");
+        if(surveyImageName!=null)   jsonParam.remove("surveyImageName");
+        if(surveyIntroductionHtmlB64!=null) jsonParam.remove("surveyIntroductionHtmlB64");
+
+        Survey survey;
+        if(surveySections==null){
+            //No sections, do not need to update section
+            survey = new Survey(surveyId, surveyTitle,surveyVersion,surveyIntroduction,surveyDisplayOrder,surveyImageName,surveyIntroductionHtmlB64);
+        }else{
+            survey = new Survey(surveyId, surveyTitle,surveyVersion,surveyIntroduction,surveyDisplayOrder,surveyImageName,surveyIntroductionHtmlB64,jsonParam.toJSONString());
+        }
+        surveyService.update(survey);
+
+ /*       if(request.getAttribute("token_ttl")!=null){
+            return new Result(true, StatusCode.OK,"update successful",null,(Long) request.getAttribute("token_ttl"));
+        }*/
+
+        return new Result(true, StatusCode.OK,"update successful");
+    }
+
 
     //the url for uploading image
     @Value("${system.config.imageSavePath}")
@@ -105,11 +162,11 @@ public class SurveyController {
     @RequestMapping(value = "/uploadImg", method = RequestMethod.POST)
     public Result uploadImg(@RequestParam("img") MultipartFile file, HttpServletRequest request){
 
-        try{
+/*        try{
             PrivilegeUtil.checkAdmin(request);
         }catch (Exception e){
             return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
-        }
+        }*/
 
         System.out.println(imageSavePath);
         String surveyId = request.getParameter("surveyId");
@@ -144,45 +201,45 @@ public class SurveyController {
         return new Result(true, StatusCode.OK,"upload failed",fileName);
     }
 
+    //Delete Images from server
+    @RequestMapping(value="/delImg",method= RequestMethod.DELETE)
+    public Result delFile(@RequestBody JSONObject jsonParam) {
+        String path = (String) jsonParam.get("path");
+
+        String resultInfo = null;
+        int lastIndexOf = path.lastIndexOf("/");
+        String img_path = path.substring(lastIndexOf + 1, path.length());
+
+        img_path = imageSavePath + img_path;
+        File file = new File(img_path);
+        if (file.exists()) {
+            if (file.delete()) {
+                resultInfo =  "delete successful";
+            } else {
+                resultInfo =  "delete fail";
+            }
+        } else {
+            resultInfo = "file doesn't exist";
+        }
+        return new Result(true, StatusCode.OK,resultInfo);
+    }
 
     /**
-     * update the details of a survey according to survey ID
-     * Require: admin user permission
+     * fetch all of the surveys without survey details
      */
-    @RequestMapping(method = RequestMethod.PUT, produces = "application/json;charset=UTF-8")
-    public Result updateById(@RequestBody JSONObject jsonParam) {
-        try{
-            PrivilegeUtil.checkAdmin(request);
-        }catch (Exception e){
-            return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
+    @RequestMapping(value = "/allImgId",method= RequestMethod.GET)
+    public Result getAllImgId(){
+        ArrayList<String> imgIdList = new ArrayList<>();
+
+        File fileNew = new File(imageSavePath);
+        //获取文件列表
+        File[] files = fileNew.listFiles();
+        for (File file : files) {
+            // 获取文件
+            imgIdList.add(file.getName());
         }
 
-        String surveyId = (String) jsonParam.get("surveyId");
-        String surveyTitle = (String) jsonParam.get("surveyTitle");
-        String surveyVersion = (String) jsonParam.get("surveyVersion");
-        String surveyIntroduction = (String) jsonParam.get("surveyIntroduction");
-        String surveyImageName = (String) jsonParam.get("surveyImageName");
-        Object surveySections = jsonParam.get("surveySections");
-
-        if(surveyId==null) return new Result(true, StatusCode.ERROR,"update fail, please contain the correct survey Id");
-
-        //remove these redundant fields
-        jsonParam.remove("surveyId");
-        if(surveyTitle!=null)   jsonParam.remove("surveyTitle");
-        if(surveyVersion!=null)   jsonParam.remove("surveyVersion");
-        if(surveyIntroduction!=null)   jsonParam.remove("surveyIntroduction");
-        if(surveyImageName!=null)   jsonParam.remove("surveyImageName");
-
-        Survey survey;
-        if(surveySections==null){
-            //No sections, do not need to update section
-            survey = new Survey(surveyId, surveyTitle,surveyVersion,surveyIntroduction,surveyImageName);
-        }else{
-            survey = new Survey(surveyId, surveyTitle,surveyVersion,surveyIntroduction,surveyImageName,jsonParam.toJSONString());
-        }
-        surveyService.update(survey);
-
-        return new Result(true, StatusCode.OK,"update successful");
+        return new Result(true, StatusCode.OK,"fetching successful",imgIdList);
     }
 
     /**

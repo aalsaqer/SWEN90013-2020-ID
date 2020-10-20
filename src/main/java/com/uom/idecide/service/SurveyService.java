@@ -34,6 +34,10 @@ public class SurveyService {
         return surveyDao.findById(id).get();
     }
 
+    public boolean existsSurveyBySurveyId(String id){
+        return surveyDao.existsSurveyBySurveyId(id);
+    }
+
     public void deleteById(String id) {
         surveyDao.deleteById(id);
     }
@@ -50,7 +54,10 @@ public class SurveyService {
         if(survey.getSurveyTitle()!=null)   update.set("surveyTitle",survey.getSurveyTitle() );
         if(survey.getSurveyVersion()!=null)   update.set("surveyVersion",survey.getSurveyVersion() );
         if(survey.getSurveyIntroduction()!=null)   update.set("surveyIntroduction",survey.getSurveyIntroduction() );
+        if(survey.getSurveyDisplayOrder()!=null)   update.set("surveyDisplayOrder",survey.getSurveyDisplayOrder() );
+
         if(survey.getSurveyImageName()!=null)   update.set("surveyImageName",survey.getSurveyImageName() );
+        if(survey.getSurveyIntroductionHtmlB64()!=null)   update.set("surveyIntroductionHtmlB64",survey.getSurveyIntroductionHtmlB64());
         if(survey.getJsonStr()!=null)   update.set("jsonStr",survey.getJsonStr() );
         //only update the fields are not null
         mongoTemplate.findAndModify(query,update,Survey.class);

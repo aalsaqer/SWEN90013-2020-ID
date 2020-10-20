@@ -2,9 +2,11 @@ package com.uom.idecide.interceptor;
 
 import com.uom.idecide.util.JwtUtil;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,7 +38,9 @@ public class JwtInterceptor implements HandlerInterceptor {
                 String token = header;
                 //Validating token
                 try{
+                    long tokenTTL = jwtUtil.isTokenExpired(token);
                     Claims claims = jwtUtil.parseJWT(token);
+
                     //try to get the info. of role by parsing token.
                     String roles = (String) claims.get("roles");
                     String id = claims.getId();
@@ -54,9 +58,14 @@ public class JwtInterceptor implements HandlerInterceptor {
                         request.setAttribute("claims_researcher",token);
                         request.setAttribute("id",id);
                     }
-                }catch (Exception e){
+                    //request.setAttribute("token_ttl", tokenTTL);
+                    response.setHeader("ttl", String.valueOf(tokenTTL));
+
+                }catch (ExpiredJwtException e){
+                    throw new ExpiredJwtException(null,null,null);
+                } catch (Exception e){
                     //if there is any problem of parsing token, throwing an exception
-                    throw new RuntimeException("Wrong Token！");
+                    throw new RuntimeException("Wrong Token!");
                 }
             //}
         }

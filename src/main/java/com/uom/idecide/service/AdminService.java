@@ -1,8 +1,10 @@
 package com.uom.idecide.service;
 
 import com.uom.idecide.dao.AdminDao;
+import com.uom.idecide.dao.UserDao;
 import com.uom.idecide.pojo.Admin;
 
+import com.uom.idecide.pojo.User;
 import com.uom.idecide.util.IdWorker;
 import com.uom.idecide.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,10 @@ public class AdminService {
 
 	@Autowired
 	private AdminDao adminDao;
-	
+
+	@Autowired
+	private UserDao userDao;
+
 	@Autowired
 	private IdWorker idWorker;
 
@@ -39,9 +44,12 @@ public class AdminService {
 	 */
 	public void add(Admin admin) throws Exception {
 		Admin adminInDb = adminDao.findByUsername(admin.getUsername());
-		if(adminInDb!=null && adminInDb.getAdminId()!=null){
-			throw new Exception("This email address has been used");
+		User userInDb = userDao.findByUsername(admin.getUsername());
+
+		if((adminInDb!=null && adminInDb.getAdminId()!=null) || ( userInDb!=null && userInDb.getUserId()!=null)){
+			throw new Exception("This username address has been used");
 		}
+
 		admin.setAdminId( idWorker.nextId()+"" );
 		//密码加密
 		admin.setPassword(encoder.encode(admin.getPassword()));
@@ -49,12 +57,14 @@ public class AdminService {
 	}
 
 
-	public Admin login(String username, String password) {
+	public Admin login(String username, String password) throws Exception {
 		Admin adminLogin = adminDao.findByUsername(username);
-		//2.然后那数据库中的密码和用户输入的密码匹配是否相同
-		if(adminLogin!=null && encoder.matches(password,adminLogin.getPassword())){	//prevent from null pointer
-			//login successful
-			return adminLogin;
+		if(adminLogin!=null){
+			if(encoder.matches(password,adminLogin.getPassword())){
+				return adminLogin;
+			}else{
+				throw new Exception("wrong email or password");
+			}
 		}
 		return null;
 	}

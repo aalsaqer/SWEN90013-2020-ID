@@ -1,7 +1,9 @@
 package com.uom.idecide.service;
 
+import com.uom.idecide.dao.AdminDao;
 import com.uom.idecide.dao.UserDao;
 
+import com.uom.idecide.pojo.Admin;
 import com.uom.idecide.pojo.User;
 import com.uom.idecide.util.IdWorker;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class UserService {
 
 	@Autowired
 	private UserDao userDao;
+
+	@Autowired
+	private AdminDao adminDao;
 	
 	@Autowired
 	private IdWorker idWorker;
@@ -38,8 +43,11 @@ public class UserService {
 	 */
 	public void add(User user) throws Exception {
 		User userInDb = userDao.findByUsername(user.getUsername());
-		if(userInDb!=null && userInDb.getUserId()!=null){
-			throw new Exception("This email address has been used");
+		Admin adminInDb = adminDao.findByUsername(user.getUsername());
+
+		//make sure the username has not been used in both user & admin
+		if((userInDb!=null && userInDb.getUserId()!=null) || (adminInDb!=null && adminInDb.getAdminId()!=null)){
+			throw new Exception("This username has been used");
 		}
 		if(user.getUserId()==null || "".equals(user.getUserId())){
 			//if user already have user id, dont need to assign a new one
@@ -54,12 +62,16 @@ public class UserService {
 	public User login(String username, String password) throws Exception {
 		User userLogin = userDao.findByUsername(username);
 		//check whether the password submitted is equal to the password from database
-		if(userLogin!=null && encoder.matches(password,userLogin.getPassword())){	//prevent from null pointer
+		if(userLogin!=null){	//prevent from null pointer
 			//login successful
-			return userLogin;
-		}else{
-			throw new Exception("wrong email or password");
+			if(encoder.matches(password,userLogin.getPassword())){
+				return userLogin;
+			}
+			else{
+				throw new Exception("wrong email or password");
+			}
 		}
+		return null;
 	}
 
 	/**

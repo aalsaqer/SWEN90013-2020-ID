@@ -2,7 +2,9 @@ package com.uom.idecide.controller;
 
 import com.uom.idecide.entity.Result;
 import com.uom.idecide.entity.StatusCode;
+import com.uom.idecide.pojo.Admin;
 import com.uom.idecide.pojo.User;
+import com.uom.idecide.service.AdminService;
 import com.uom.idecide.service.UserService;
 
 import com.uom.idecide.util.IdWorker;
@@ -27,6 +29,9 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private AdminService adminService;
 
 	@Autowired
 	private HttpServletRequest request;
@@ -69,19 +74,32 @@ public class UserController {
 	 * user login
 	 */
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public Result login(@RequestBody User user){
+	public Result login(@RequestBody User requestUser){
+		Admin admin;
+		User user;
+		String token;
+		Map<String,Object> map = new HashMap<>();
+
 		try {
-			user =userService.login(user.getUsername(),user.getPassword());
+			//try to find from user
+			user =userService.login(requestUser.getUsername(),requestUser.getPassword());
+			if(user==null){
+				//try to find from admin
+				admin = adminService.login(requestUser.getUsername(),requestUser.getPassword());
+				token = jwtUtil.createJWT(admin.getAdminId(),admin.getUsername(),"admin");
+				map.put("roles","admin");	//tell the frontend the role is user
+				map.put("id",admin.getAdminId());
+			}else{
+				token = jwtUtil.createJWT(user.getUserId(),user.getUsername(),"user");
+				map.put("roles","user");	//tell the frontend the role is user\
+				map.put("id",user.getUserId());
+			}
 		} catch (Exception e) {
 			return new Result(false, StatusCode.LOGINERROR,e.getMessage());
 		}
 
-		String token = jwtUtil.createJWT(user.getUserId(),user.getUsername(),"user");
 		System.out.println("login token --->: " + token);
-		Map<String,Object> map = new HashMap<>();
 		map.put("token",token);		//return the JWT to frontend
-		map.put("roles","user");	//tell the frontend the role is user
-		map.put("id",user.getUserId());
 		return new Result(true, StatusCode.OK,"login successfully",map);
 	}
 

@@ -1,9 +1,6 @@
 package com.uom.idecide.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Date;
@@ -71,6 +68,25 @@ public class JwtUtil {
                 .setSigningKey(key)
                 .parseClaimsJws(jwtStr)
                 .getBody();
+    }
+
+
+    /**
+     * 获取jwt失效时间
+     */
+    public Date getExpirationDateFromToken(String jwtStr) {
+        return parseJWT(jwtStr).getExpiration();
+    }
+
+
+    public long isTokenExpired(String token) {
+        try {
+            long expiration = getExpirationDateFromToken(token).getTime();
+            long now = new Date().getTime();
+            return expiration - now;
+        } catch (ExpiredJwtException expiredJwtException) {
+            throw expiredJwtException;
+        }
     }
 
 }
