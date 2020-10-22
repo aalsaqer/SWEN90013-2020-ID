@@ -118,6 +118,8 @@ export default class CardDeck extends Component {
 
       return (
         <div className="questionContainer">
+
+          
           <Slider
             ref={`slider-${item.questionId}`}
             className="ranger-container-silder"
@@ -128,6 +130,17 @@ export default class CardDeck extends Component {
               silderresult = event;
             }}
           />
+            
+               <div className="label-container">
+            
+              <span className="label" >
+                {item.sliderMinValue}
+              </span>
+              <span className="label" >
+                {item.sliderMaxValue}
+              </span>
+            
+          </div>
 
           {/* Need to discuss about the button locations */}
           <div className="button-container">
