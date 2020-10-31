@@ -31,7 +31,7 @@ public class KVController {
 	private HttpServletRequest request;
 
 	/**
-	 * for storage
+	 * for storage, put the key-value pair into database
 	 */
 	@RequestMapping(method= {RequestMethod.POST, RequestMethod.PUT})
 	public Result add(@RequestBody KeyValue kv){
