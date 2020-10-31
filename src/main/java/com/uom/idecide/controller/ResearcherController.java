@@ -18,7 +18,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Controller layer
+ * @deprecated Please use admin instead
+ * Controller layer of the survey, which provides the interface for the front-end.
+ * Handling HTTP/HTTPS request.
  */
 @RestController
 @CrossOrigin

@@ -2,6 +2,8 @@ package com.uom.idecide.util;
 
 import com.uom.idecide.pojo.Answer;
 import com.uom.idecide.pojo.Question;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,11 +12,43 @@ import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+/**
+ * This class is used for exporting the specified results into .csv file.
+ */
+@Component
 public class CsvUtils {
+
+    private static String url;
+
+    private static String fileSavePath;
+
+    private static String fileLoadPath;
+
+    private static String fileServerPort;
+
+    @Value("${system.config.url}")
+    public void setUrl(String url) {
+        CsvUtils.url = url;
+    }
+
+    @Value("${system.config.fileSavePath}")
+    public void setFileSavePath(String fileSavePath) {
+        CsvUtils.fileSavePath = fileSavePath;
+    }
+
+    @Value("${system.config.fileLoadPath}")
+    public void setFileLoadPath(String fileLoadPath) {
+        CsvUtils.fileLoadPath = fileLoadPath;
+    }
+
+    @Value("${system.config.fileServerPort}")
+    public void setFileServerPort(String fileServerPort) {
+        CsvUtils.fileServerPort = fileServerPort;
+    }
+
     public static String exportData(String csvName, List<Answer> resultList) {
         try {
-            File file = new File("/usr/local/files/"+csvName+".csv");
-            //File file = new File("C:\\Users\\conan\\Desktop\\" + csvName + ".csv");
+            File file = new File(fileSavePath +csvName+".csv");
             OutputStreamWriter ow = new OutputStreamWriter(new FileOutputStream(file), "utf-8");
             ow.write("userId");
             ow.write(",");
@@ -79,20 +113,20 @@ public class CsvUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "8.210.28.169/files/" + csvName + ".csv";
+        return url + ":" + fileServerPort + fileLoadPath + csvName + ".csv";
 
     }
 
     public static String handleCsvComma(String str) {
         StringBuilder sb = new StringBuilder();
         String handleStr=str;
-        //先判断字符里是否含有逗号
+        //decide whether there are colon in string
         if(str.contains(",")){
-            //如果还有双引号，先将双引号转义，避免两边加了双引号后转义错误
+            //escape the quotation mark
             if(str.contains("\"")){
                 handleStr=str.replace("\"", "\"\"");
             }
-            //将逗号转义
+            //escape the colon
             handleStr="\""+handleStr+"\"";
         }
         return sb.append(handleStr).append(",").toString();

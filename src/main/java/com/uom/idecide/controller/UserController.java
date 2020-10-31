@@ -20,7 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Controller layer
+ * Controller layer of the user, which provides the interface for the front-end.
+ * Handling HTTP/HTTPS request.
  */
 @RestController
 @CrossOrigin

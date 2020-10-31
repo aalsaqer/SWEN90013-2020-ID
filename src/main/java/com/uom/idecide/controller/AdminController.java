@@ -18,7 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Controller layer
+ * Controller layer of the admin, which provides the interface for the front-end.
+ * Handling HTTP/HTTPS request.
  */
 @RestController
 @CrossOrigin

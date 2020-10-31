@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Controller layer for supporting Action Plan
+ * Controller layer of the action plan, which provides the interface for the front-end.
+ * Handling HTTP/HTTPS request.
  */
 @RestController
 @CrossOrigin

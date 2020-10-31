@@ -21,7 +21,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * Controller layer
+ * Controller layer of the survey, which provides the interface for the front-end.
+ * Handling HTTP/HTTPS request.
  */
 @RestController
 @CrossOrigin
@@ -56,6 +57,7 @@ public class SurveyController {
      * add new survey
      * Require: admin user permission
      */
+/*
     @RequestMapping(method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
     public Result add(@RequestBody JSONObject jsonParam) {
         try{
@@ -70,6 +72,7 @@ public class SurveyController {
             //check whether the id exist
             return new Result(true, StatusCode.REPERROR,"survey id already exist, please use another id");
         }
+
 
         String surveyTitle = (String) jsonParam.get("surveyTitle");
         String surveyVersion = (String) jsonParam.get("surveyVersion");
@@ -98,11 +101,13 @@ public class SurveyController {
        // return the inserted survey's surveyId to frontend
         return new Result(true, StatusCode.OK,"Insert successful", surveyService.save(survey));
     }
+*/
 
     /**
      * update the details of a survey according to survey ID
      * Require: admin user permission
      */
+/*
     @RequestMapping(method = RequestMethod.PUT, produces = "application/json;charset=UTF-8")
     public Result updateById(@RequestBody JSONObject jsonParam) {
         try{
@@ -123,7 +128,7 @@ public class SurveyController {
         if(surveyId==null) return new Result(true, StatusCode.ERROR,"update fail, please contain the correct survey Id");
 
         //remove these redundant fields
-        jsonParam.remove("surveyId");
+        if(surveyId!=null) jsonParam.remove("surveyId");
         if(surveyTitle!=null)   jsonParam.remove("surveyTitle");
         if(surveyVersion!=null)   jsonParam.remove("surveyVersion");
         if(surveyIntroduction!=null)   jsonParam.remove("surveyIntroduction");
@@ -139,11 +144,61 @@ public class SurveyController {
         }
         surveyService.update(survey);
 
- /*       if(request.getAttribute("token_ttl")!=null){
+ */
+/*       if(request.getAttribute("token_ttl")!=null){
             return new Result(true, StatusCode.OK,"update successful",null,(Long) request.getAttribute("token_ttl"));
-        }*/
+        }*//*
+
 
         return new Result(true, StatusCode.OK,"update successful");
+    }
+*/
+
+    /**
+     * update the details of a survey according to survey ID
+     * Require: admin user permission
+     */
+    @RequestMapping(method = {RequestMethod.PUT,RequestMethod.POST}, produces = "application/json;charset=UTF-8")
+    public Result saveOrUpdateById(@RequestBody JSONObject jsonParam) {
+        try{
+            PrivilegeUtil.checkAdmin(request);
+        }catch (Exception e){
+            return new Result(false, StatusCode.ACCESSERROR,e.getMessage());
+        }
+
+        String surveyId = (String) jsonParam.get("surveyId");
+        String surveyTitle = (String) jsonParam.get("surveyTitle");
+        String surveyVersion = (String) jsonParam.get("surveyVersion");
+        String surveyIntroduction = (String) jsonParam.get("surveyIntroduction");
+        Integer surveyDisplayOrder = (Integer) jsonParam.get("surveyDisplayOrder");
+        String surveyImageName = (String) jsonParam.get("surveyImageName");
+        String surveyIntroductionHtmlB64 = (String) jsonParam.get("surveyIntroductionHtmlB64");
+        Object surveySections = jsonParam.get("surveySections");
+
+        if(surveyId==null) return new Result(true, StatusCode.ERROR,"Please contain the correct survey Id");
+
+        //remove these redundant fields
+        if(surveyId!=null) jsonParam.remove("surveyId");
+        if(surveyTitle!=null)   jsonParam.remove("surveyTitle");
+        if(surveyVersion!=null)   jsonParam.remove("surveyVersion");
+        if(surveyIntroduction!=null)   jsonParam.remove("surveyIntroduction");
+        if(surveyImageName!=null)   jsonParam.remove("surveyImageName");
+        if(surveyIntroductionHtmlB64!=null) jsonParam.remove("surveyIntroductionHtmlB64");
+
+        Survey survey;
+        if(surveySections==null){
+            //No sections, do not need to update section
+            survey = new Survey(surveyId, surveyTitle,surveyVersion,surveyIntroduction,surveyDisplayOrder,surveyImageName,surveyIntroductionHtmlB64);
+        }else{
+            survey = new Survey(surveyId, surveyTitle,surveyVersion,surveyIntroduction,surveyDisplayOrder,surveyImageName,surveyIntroductionHtmlB64,jsonParam.toJSONString());
+        }
+
+        if("POST".equals(request.getMethod())){
+            return new Result(true, StatusCode.OK,"Insert successful", surveyService.save(survey));
+        }else{
+            surveyService.update(survey);
+            return new Result(true, StatusCode.OK,"update successful");
+        }
     }
 
 
@@ -232,10 +287,10 @@ public class SurveyController {
         ArrayList<String> imgIdList = new ArrayList<>();
 
         File fileNew = new File(imageSavePath);
-        //获取文件列表
+        //fetch all the images under dir
         File[] files = fileNew.listFiles();
         for (File file : files) {
-            // 获取文件
+            // fetch a image from dir
             imgIdList.add(file.getName());
         }
 
